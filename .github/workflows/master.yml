@@ -9,7 +9,3 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Terraform Quality Gate
-        uses: OptionAlpaca/terraform_quality_gate@v0.1.15
-        with:
-          terratest: none
