@@ -37,7 +37,7 @@ fi
 # Terraform fmt file syntax check
 echo "Verifying Terraform file format..."
 
-docker run --rm -v $(pwd):/data hashicorp/terraform:light fmt -check data/
+docker run --rm -v $(pwd):/data hashicorp/terraform:light fmt data/
 
 status=$?
 
