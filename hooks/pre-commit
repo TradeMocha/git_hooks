@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+OPTIONALPACA_ORG=$(git remote get-url origin | grep -Eo "[:\/](OptionAlpaca)\/")
+
+# If we aren't working on an OA project, exit and skip rest of script
+if [[ -z "${OPTIONALPACA_ORG}" ]]; then
+    exit 0
+fi
+
+# Validate we have terraform code, otherwise ignore
+files=$(find . -iname "*.tf" | wc -l)
+
+# Find returns non-zero if there are no matches. No matches means no tf, so skip checks below
+if [[ $files -eq 0 ]]; then
+  exit 0;
+fi
+
+# Validate docker is installed, otherwise cancel with error
+docker --version
+status=$?
+
+if [[ $status -ne 0 ]]; then
+  echo "Docker needs to be installed" && exit $status
+fi
+
+# Tflint static analysis
+docker run --rm -v $(pwd):/data -t wata727/tflint
+
+status=$?
+
+if [[ $status -eq 0 ]]; then
+  echo "Static analysis successful"
+else
+  echo "$cmd TFlint failed" && exit 1
+fi
+
+# Terraform fmt file syntax check
+echo "Verifying Terraform file format..."
+
+docker run --rm -v $(pwd):/data hashicorp/terraform:light fmt data/
+
+status=$?
+
+if [[ $status -eq 0 ]]; then
+  echo "Terraform linting successful"
+else
+  echo "Terraform fmt FAILED" && exit 1
+fi
+
+
+echo "Pre-commit analysis complete" && exit 0
